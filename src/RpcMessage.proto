@@ -1,0 +1,23 @@
+package maxiaoda;
+
+enum MessageType
+{
+	REQUEST = 0;
+	RESPONSE = 1;
+	ERROR = 2;
+}
+
+enum ErrorReason
+{
+	UKNOWERROR = 0;
+}
+
+message RpcMessage
+{
+	required MessageType type = 1;
+	required int32 id =2;
+	optional string service =3;
+	optional string method =4;
+	optional bytes contend =5;
+	optional ErrorReason error =6;
+}
