@@ -28,4 +28,4 @@
 *.app
 
 # not to add
-/sudoku
+sudoku/
