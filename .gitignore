@@ -29,3 +29,5 @@
 
 # not to add
 sudoku/
+build/
+example/

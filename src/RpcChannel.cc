@@ -1,12 +1,17 @@
 #include <google/protobuf/service.h>
 #include "ProtobufCodec.h"
+#include "RpcChannel.h"
+#include <boost/bind.hpp>
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
 
+namespace maxiaoda
+{
 using namespace muduo;
 using namespace muduo::net;
-using namespace maxiaoda;
 
 RpcChannel::RpcChannel()
-	:id_(-1),codec_(boost::bind(&rpcMessageCallback,this,1_,2_,3_))
+	:id_(-1),codec_(boost::bind(&RpcChannel::rpcMessageCallback,this,_1,_2,_3))
 {
 }
 
@@ -22,69 +27,69 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 	message.set_service(method->service()->name());
 	message.set_method(method->name());
 	std::string str;
-	request->SerializeToString(str);
+	request->SerializeToString(&str);
 	message.set_contend(str);
 	
-	responseDoneMap_[id_] = { response,done };//FIXME:unsafe
+	responseDoneMap_[id_] = std::make_pair(response,done);//FIXME:unsafe
 
 	codec_.send(message,conn_);
 }
 	
 
-inline void RpcChannel::messageCallback(const TcpConnectionPtr& conn,
-					 Buffer* buf,
-					 Timestamp now)
-{
-	codec_.messageCallback(conn,buf,now);
-}
-
 
 void RpcChannel::rpcMessageCallback(const TcpConnectionPtr& conn,
-						const MessagePtr& message,
+						const RpcMessage& message,
 						Timestamp now)
 {//FIXME:error check
-	int32_t id = message->id();
-	if (message->type() == RESPONSE)
+	int32_t id = message.id();
+	if (message.type() == RESPONSE)
 	{	
-		ResponseDone::const_iterator it = responseDoneMap_.find(id);
-		
+		ResponseDoneMap::iterator it = responseDoneMap_.find(id);
 		assert(it != responseDoneMap_.end());
-		it->first()->ParseFromString(message->contend());//response			
-		::google::protobuf::Closure* done = it->second();
+		::google::protobuf::Message* response = it->second.first;
+		response->ParseFromString(message.contend());//response			
+		::google::protobuf::Closure* done = it->second.second;
+		if (done)
+		{
+			done->Run();
+		}
 		responseDoneMap_.erase(it); //FIXME:unsafe
-		done->run();
 	}
-	else if (message->type() == REQUEST)
+	else if (message.type() == REQUEST)
 	{
-		ServicesMap::const_iterator it = services_.find(message->service());
+		ServicesMap::const_iterator it = services_->find(message.service());
 		
-		assert(it != services_.end());
-		::google::protobuf::Service service = *it;
-		const ::google::protobuf::MethodDescriptor* method = service->GetDescriptor()->FindMethodByName(message->method());
+		assert(it != services_->end());
+		::google::protobuf::Service* service = it->second;
+		const ::google::protobuf::ServiceDescriptor* des = service->GetDescriptor();
+		const ::google::protobuf::MethodDescriptor* method = des->FindMethodByName(message.method());
 		assert(method);
-		boost::scoped_ptr<::google::protobuf::Message> request(service->GetRequestPrototype()->New());
+		boost::scoped_ptr< ::google::protobuf::Message> request(service->GetRequestPrototype(method).New());
 		//automatically delete
-		::google::protobuf::Message* response = service->GetResponsePrototype()->New();
+		::google::protobuf::Message* response = service->GetResponsePrototype(method).New();
 		//automatically delete by doneCallback
-		request->ParseFromString(message->contend());
+		request->ParseFromString(message.contend());
 
-		service->CallMethod(method,NULL,request,response,NewCallback(this,&doneCallback,response,id));
+		service->CallMethod(method,NULL,get_pointer(request),response,NewCallback(this,&RpcChannel::doneCallback,response,id));
 	}
 }
 
-void RpcChannel::registerService(::google::protobuf::Service* service)
+void RpcChannel::setServices(const ServicesMap* services)
 {
-	services_[service->name()] = service;
+	services_ = services;
 }
 
 void RpcChannel::doneCallback(::google::protobuf::Message* response,
 							  int32_t id)
 {
-	boost::scoped_ptr<::google::protobuf::Message> deletor(response);
+	boost::scoped_ptr< ::google::protobuf::Message> deletor(response);
 	RpcMessage message;
 	message.set_type(RESPONSE);
 	message.set_id(id);
-	message.set_contend(response->SerializeToString());
+	std::string str;
+	response->SerializeToString(&str);
+	message.set_contend(str);
 	codec_.send(message,conn_);
 }
 	
+}//namespace maxiaoda

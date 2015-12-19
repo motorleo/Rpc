@@ -1,15 +1,23 @@
+#ifndef _RPCCHANNEL_H_
+#define _RPCCHANNEL_H_
+
 #include <string>
 #include <muduo/net/TcpConnection.h>
 #include <utility>
 #include "RpcMessage.pb.h"
+#include "ProtobufCodec.h"
 #include <stdint.h>
+#include <google/protobuf/service.h>
+#include <boost/shared_ptr.hpp>
+
+namespace maxiaoda
+{
 
 using namespace muduo;
 using namespace muduo::net;
-
 typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
+typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
 
-class ProtobufCodec;
 
 class RpcChannel : public ::google::protobuf::RpcChannel
 {  //FIXME: no error check
@@ -24,15 +32,19 @@ public:
 					::google::protobuf::Closure* done);
 	
 
-	inline void messageCallback(const TcpConnectionPtr&,
-						 Buffer*,
-						 Timestamp);
+	inline void messageCallback(const TcpConnectionPtr& conn,
+						 Buffer* buf,
+						 Timestamp now)
+	{
+		codec_.messageCallback(conn,buf,now);
+	}
+
 
 	void rpcMessageCallback(const TcpConnectionPtr&,
-							const MessagePtr&,
+							const RpcMessage&,
 							Timestamp);
 
-	void registerService(::google::protobuf::Service*);
+	void setServices(const ServicesMap*);
 
 	inline void setConnection(const TcpConnectionPtr& conn)
 	{
@@ -41,17 +53,21 @@ public:
 
 private:
 
-	void doneCallback(::google::protobuf::Message*
+	void doneCallback(::google::protobuf::Message*,
 					  int32_t);
 
-	typedef std::pair<::google::protobuf::Message*,::google::protubuf::Closure*> ResponseDone;
+	typedef std::pair< ::google::protobuf::Message*,::google::protobuf::Closure*> ResponseDone;
 	typedef std::map<int32_t,ResponseDone> ResponseDoneMap;
 
 	int32_t id_;
 	ProtobufCodec codec_;
 	TcpConnectionPtr conn_;
 	ResponseDoneMap responseDoneMap_;
-	ServicesMap services_;
+	const ServicesMap* services_;
 };
 
 typedef boost::shared_ptr<RpcChannel> RpcChannelPtr;
+
+}
+
+#endif
