@@ -1,57 +1,44 @@
-// Copyright 2010, Shuo Chen.  All rights reserved.
-// http://code.google.com/p/muduo/
-//
-// Use of this source code is governed by a BSD-style license
-// that can be found in the License file.
-
-// Author: Shuo Chen (chenshuo at chenshuo dot com)
-//
-// This is a public header file, it must only include public header files.
-
-#ifndef MUDUO_NET_PROTORPC_RPCSERVER_H
-#define MUDUO_NET_PROTORPC_RPCSERVER_H
+#ifndef _RPCSERVER_H_
+#define _RPCSERVER_H_
 
 #include <muduo/net/TcpServer.h>
-
-namespace google {
-namespace protobuf {
-
-class Service;
-
-}  // namespace protobuf
-}  // namespace google
-
-namespace maxiaoda 
+namespace google
 {
+namespace protobuf
+{
+	class Service;
+}
+}
+
+namespace maxiaoda
+{
+
 using namespace muduo;
 using namespace muduo::net;
 
-class RpcServer
+class RpcServer : public boost::noncopyable
 {
- public:
-  RpcServer(EventLoop* loop,
-            const InetAddress& listenAddr);
 
-  void setThreadNum(int numThreads)
-  {
-    server_.setThreadNum(numThreads);
-  }
+public:
+	RpcServer(EventLoop* loop,
+		      const InetAddress& listenAddr,
+			  const string nameArg = "RpcServer");
 
-  void registerService(::google::protobuf::Service*);
-  void start();
+	void registerService( ::google::protobuf::Service*);
+	void start()
+	{
+		server_.start();
+	}
 
- private:
-  void onConnection(const TcpConnectionPtr& conn);
 
-  // void onMessage(const TcpConnectionPtr& conn,
-  //                Buffer* buf,
-  //                Timestamp time);
+private:
+	void onConnection(const TcpConnectionPtr&);
 
-  TcpServer server_;
-  std::map<std::string, ::google::protobuf::Service*> services_;
+	typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
+
+	ServicesMap services_;
+	TcpServer server_;
 };
 
 }
-
-
-#endif  // MUDUO_NET_PROTORPC_RPCSERVER_H
+#endif

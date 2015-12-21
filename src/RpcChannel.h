@@ -16,7 +16,6 @@ namespace maxiaoda
 using namespace muduo;
 using namespace muduo::net;
 typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
-typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
 
 
 class RpcChannel : public ::google::protobuf::RpcChannel
@@ -56,7 +55,9 @@ private:
 	void doneCallback(::google::protobuf::Message*,
 					  int32_t);
 
-	typedef std::pair< ::google::protobuf::Message*,::google::protobuf::Closure*> ResponseDone;
+	typedef std::pair< ::google::protobuf::Message*,
+					  ::google::protobuf::Closure*> ResponseDone;
+	//automically delete response in client
 	typedef std::map<int32_t,ResponseDone> ResponseDoneMap;
 
 	int32_t id_;

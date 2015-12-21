@@ -41,4 +41,5 @@ link_directories("~/build/release-install/lib")
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 add_subdirectory(src)
+add_subdirectory(sudoku)
 
