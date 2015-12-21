@@ -10,10 +10,12 @@ RpcClientLite::RpcClientLite(EventLoop* loop,
 							 const string nameArg)
 	:loop_(loop),channel_(new RpcChannel),client_(loop,serverAddr,nameArg)
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	//version check
 	client_.setConnectionCallback(
 			boost::bind(&RpcClientLite::onConnection,this,_1));
 	client_.setMessageCallback(
-			boost::bind(&RpcChannel::messageCallback,get_pointer(channel_),_1,_2,_3));
+			boost::bind(&RpcChannel::onMessage,get_pointer(channel_),_1,_2,_3));
 }
 
 

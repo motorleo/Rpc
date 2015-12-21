@@ -9,7 +9,12 @@ enum MessageType
 
 enum ErrorReason
 {
-	UKNOWERROR = 0;
+	UNKNOWN_ERROR = 0;
+	BAD_REQUEST = 1;
+	BAD_RESPONSE = 2;
+	SERVICE_NOT_FOUND = 3;
+	METHOD_NOT_FOUND = 4;
+	RPC_ERROR = 5;
 }
 
 message RpcMessage

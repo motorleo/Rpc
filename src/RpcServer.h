@@ -24,6 +24,11 @@ public:
 		      const InetAddress& listenAddr,
 			  const string nameArg = "RpcServer");
 
+	~RpcServer()
+	{
+		::google::protobuf::ShutdownProtobufLibrary();
+	}
+
 	void registerService( ::google::protobuf::Service*);
 	void start()
 	{

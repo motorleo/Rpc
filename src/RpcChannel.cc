@@ -1,9 +1,8 @@
-#include <google/protobuf/service.h>
 #include "ProtobufCodec.h"
 #include "RpcChannel.h"
 #include <boost/bind.hpp>
 #include <google/protobuf/descriptor.h>
-#include <google/protobuf/message.h>
+#include <google/protobuf/service.h>
 
 namespace maxiaoda
 {
@@ -11,7 +10,7 @@ using namespace muduo;
 using namespace muduo::net;
 
 RpcChannel::RpcChannel()
-	:id_(-1),codec_(boost::bind(&RpcChannel::rpcMessageCallback,this,_1,_2,_3))
+	:id_(-1),codec_(boost::bind(&RpcChannel::onRpcMessage,this,_1,_2,_3))
 {
 }
 
@@ -37,9 +36,9 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 	
 
 
-void RpcChannel::rpcMessageCallback(const TcpConnectionPtr& conn,
-						const RpcMessage& message,
-						Timestamp now)
+void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
+						      const RpcMessage& message,
+							  Timestamp now)
 {//FIXME:error check
 	int32_t id = message.id();
 	if (message.type() == RESPONSE)

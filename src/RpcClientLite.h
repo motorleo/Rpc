@@ -2,7 +2,6 @@
 #define _RPCCLIENT_H_
 
 #include <muduo/net/TcpClient.h>
-#include "RpcMessage.pb.h"
 #include "RpcChannel.h"
 
 namespace maxiaoda
@@ -16,6 +15,11 @@ public:
 	RpcClientLite(EventLoop* loop,
 				  const InetAddress& serverAddr,
 				  const string nameArg = "RpcClient");
+
+	~RpcClientLite()
+	{
+		::google::protobuf::ShutdownProtobufLibrary();
+	}
 
 	void connect()
 	{

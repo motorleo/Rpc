@@ -2,14 +2,11 @@
 #define _PROTOBUFCODEC_H_
 
 #include <muduo/net/TcpConnection.h>
-#include <muduo/base/Timestamp.h>
-#include <muduo/net/Buffer.h>
 #include "RpcMessage.pb.h"
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <string>
 
 namespace maxiaoda
 {
@@ -33,9 +30,9 @@ public:
 
 	void send(const ::google::protobuf::Message&,const TcpConnectionPtr&);
 
-	void messageCallback(const TcpConnectionPtr&,
-						 Buffer*,
-						 Timestamp);
+	void onMessage(const TcpConnectionPtr&,
+				   Buffer*,
+				   Timestamp);
 
 private:
 	const static size_t kHeader = sizeof(int32_t);

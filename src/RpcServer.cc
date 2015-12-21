@@ -11,6 +11,8 @@ RpcServer::RpcServer(EventLoop* loop,
 					 const string nameArg)
 	:server_(loop,listenAddr,nameArg)
 {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	//version check
 	server_.setConnectionCallback(
 			boost::bind(&RpcServer::onConnection,this,_1));
 }
@@ -28,7 +30,7 @@ void RpcServer::onConnection(const TcpConnectionPtr& conn)
 		channel->setConnection(conn);
 		channel->setServices(&services_);
 		conn->setMessageCallback(
-				boost::bind(&RpcChannel::messageCallback,get_pointer(channel),_1,_2,_3));
+				boost::bind(&RpcChannel::onMessage,get_pointer(channel),_1,_2,_3));
 		conn->setContext(channel);
 	}
 	else

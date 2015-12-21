@@ -23,9 +23,9 @@ void ProtobufCodec::send(const ::google::protobuf::Message& message,
 	conn->send(&buf);
 }
 
-void ProtobufCodec::messageCallback(const TcpConnectionPtr& conn,
-									Buffer* buf,
-									Timestamp now)
+void ProtobufCodec::onMessage(const TcpConnectionPtr& conn,
+						      Buffer* buf,
+							  Timestamp now)
 {
 	while (buf->readableBytes() > kHeader) //not allowed for empty package
 	{
@@ -38,7 +38,7 @@ void ProtobufCodec::messageCallback(const TcpConnectionPtr& conn,
 		{
 			RpcMessage message;
 			buf->retrieve(kHeader);
-			message.ParseFromArray(buf->peek(),len);
+			message.ParseFromArray(buf->peek(),static_cast<int>(len));
 			messageCallback_(conn,message,now);
 			buf->retrieve(len);
 		}

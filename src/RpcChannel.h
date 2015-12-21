@@ -1,14 +1,12 @@
 #ifndef _RPCCHANNEL_H_
 #define _RPCCHANNEL_H_
 
-#include <string>
 #include <muduo/net/TcpConnection.h>
-#include <utility>
-#include "RpcMessage.pb.h"
 #include "ProtobufCodec.h"
-#include <stdint.h>
 #include <google/protobuf/service.h>
-#include <boost/shared_ptr.hpp>
+
+#include <stdint.h>
+#include <utility>
 
 namespace maxiaoda
 {
@@ -31,17 +29,17 @@ public:
 					::google::protobuf::Closure* done);
 	
 
-	inline void messageCallback(const TcpConnectionPtr& conn,
-						 Buffer* buf,
-						 Timestamp now)
+	inline void onMessage(const TcpConnectionPtr& conn,
+	 					  Buffer* buf,
+						  Timestamp now)
 	{
-		codec_.messageCallback(conn,buf,now);
+		codec_.onMessage(conn,buf,now);
 	}
 
 
-	void rpcMessageCallback(const TcpConnectionPtr&,
-							const RpcMessage&,
-							Timestamp);
+	void onRpcMessage(const TcpConnectionPtr&,
+					  const RpcMessage&,
+					  Timestamp);
 
 	void setServices(const ServicesMap*);
 
