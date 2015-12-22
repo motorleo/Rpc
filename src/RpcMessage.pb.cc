@@ -92,8 +92,11 @@ void protobuf_AddDesc_RpcMessage_2eproto() {
     "\022\n\n\002id\030\002 \002(\005\022\017\n\007service\030\003 \001(\t\022\016\n\006method\030"
     "\004 \001(\t\022\017\n\007contend\030\005 \001(\014\022$\n\005error\030\006 \001(\0162\025."
     "maxiaoda.ErrorReason*3\n\013MessageType\022\013\n\007R"
-    "EQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002*\035\n\013Err"
-    "orReason\022\016\n\nUKNOWERROR\020\000", 264);
+    "EQUEST\020\000\022\014\n\010RESPONSE\020\001\022\t\n\005ERROR\020\002*\236\001\n\013Er"
+    "rorReason\022\020\n\014UNKNOW_ERROR\020\000\022\017\n\013BAD_REQUE"
+    "ST\020\001\022\020\n\014BAD_RESPONSE\020\002\022\025\n\021SERVICE_NOT_FO"
+    "UND\020\003\022\024\n\020METHOD_NOT_FOUND\020\004\022\025\n\021BAD_REQUE"
+    "ST_PROTO\020\005\022\026\n\022BAD_RESPONSE_PROTO\020\006", 394);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "RpcMessage.proto", &protobuf_RegisterTypes);
   RpcMessage::default_instance_ = new RpcMessage();
@@ -129,6 +132,12 @@ const ::google::protobuf::EnumDescriptor* ErrorReason_descriptor() {
 bool ErrorReason_IsValid(int value) {
   switch(value) {
     case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
       return true;
     default:
       return false;

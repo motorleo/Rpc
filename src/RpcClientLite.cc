@@ -1,6 +1,7 @@
 #include "RpcChannel.h"
 #include "RpcClientLite.h"
 #include <boost/bind.hpp>
+#include <muduo/base/Logging.h>
 #include <muduo/net/EventLoop.h>
 
 namespace maxiaoda
@@ -21,6 +22,9 @@ RpcClientLite::RpcClientLite(EventLoop* loop,
 
 void RpcClientLite::onConnection(const TcpConnectionPtr& conn)
 {
+	LOG_INFO << "RpcClient - " << conn->localAddress().toIpPort() << " -> "
+		<< conn->peerAddress().toIpPort() << " is "
+		<< (conn->connected() ? "UP" : "DOWN");
 	if (conn->connected())//log
 	{
 		channel_->setConnection(conn);

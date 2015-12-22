@@ -1,3 +1,4 @@
+#include <muduo/base/Logging.h>
 #include <google/protobuf/service.h>
 #include "RpcChannel.h"
 #include <boost/bind.hpp>
@@ -24,6 +25,9 @@ void RpcServer::registerService( ::google::protobuf::Service* service)
 
 void RpcServer::onConnection(const TcpConnectionPtr& conn)
 {
+	LOG_INFO << "RpcServer - " << conn->peerAddress().toIpPort() << " -> "
+		<< conn->localAddress().toIpPort() << " is "
+		<< (conn->connected() ? "UP" : "DOWN");
 	if (conn->connected())
 	{
 		RpcChannelPtr channel(new RpcChannel);

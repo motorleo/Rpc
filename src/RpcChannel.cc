@@ -1,3 +1,4 @@
+#include <muduo/base/Logging.h>
 #include "ProtobufCodec.h"
 #include "RpcChannel.h"
 #include <boost/bind.hpp>
@@ -22,14 +23,20 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 {
 	RpcMessage message;
 	message.set_type(REQUEST);
-	message.set_id(++id_);//FIXME:not threadsafe
 	message.set_service(method->service()->name());
 	message.set_method(method->name());
 	std::string str;
-	request->SerializeToString(&str);
+	if (!request->SerializeToString(&str))
+	{
+		LOG_FATAL << "RpcChannel::CallMethod() : Request serialize to string error !";
+	}
 	message.set_contend(str);
-	
-	responseDoneMap_[id_] = std::make_pair(response,done);//FIXME:unsafe
+
+	{
+		MutexLockGaurd lock(mutex_);	
+		message.set_id(++id_);
+		responseDoneMap_[id_] = ::std::make_pair(response,done);
+	}
 
 	codec_.send(message,conn_);
 }
@@ -39,14 +46,26 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 						      const RpcMessage& message,
 							  Timestamp now)
-{//FIXME:error check
+{
+	assert(conn == conn_);
 	int32_t id = message.id();
 	if (message.type() == RESPONSE)
 	{	
 		ResponseDoneMap::iterator it = responseDoneMap_.find(id);
 		assert(it != responseDoneMap_.end());
+		if (it == responseDoneMap_.end())
+		{
+			errorCall(conn,BAD_RESPONSE);
+			return;
+		}
 		::google::protobuf::Message* response = it->second.first;
-		response->ParseFromString(message.contend());//response			
+		if (!response->ParseFromString(message.contend()))
+		{
+			errorCall(conn,BAD_RESPONSE_PROTO);
+			responseDoneMap_.erase(it); //FIXME:unsafe
+			return;
+		}
+		assert(response);
 		::google::protobuf::Closure* done = it->second.second;
 		if (done)
 		{
@@ -57,25 +76,80 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 	else if (message.type() == REQUEST)
 	{
 		ServicesMap::const_iterator it = services_->find(message.service());
-		
-		assert(it != services_->end());
+		if (it == services_->end())
+		{
+			errorSend(conn,SERVICE_NOT_FOUND,id);
+			return;
+		}
 		::google::protobuf::Service* service = it->second;
 		const ::google::protobuf::ServiceDescriptor* des = service->GetDescriptor();
 		const ::google::protobuf::MethodDescriptor* method = des->FindMethodByName(message.method());
-		assert(method);
+		if (method == NULL)
+		{
+			errorSend(conn,METHOD_NOT_FOUND,id);
+			return;
+		}
 		boost::scoped_ptr< ::google::protobuf::Message> request(service->GetRequestPrototype(method).New());
 		//automatically delete
+		if (!request->ParseFromString(message.contend()))
+		{
+			errorSend(conn,BAD_REQUEST_PROTO,id);
+			return;
+		}
 		::google::protobuf::Message* response = service->GetResponsePrototype(method).New();
 		//automatically delete by doneCallback
-		request->ParseFromString(message.contend());
 
 		service->CallMethod(method,NULL,get_pointer(request),response,NewCallback(this,&RpcChannel::doneCallback,response,id));
+	}
+	else if (message.type() == ERROR)
+	{
+		errorCall(conn,message.error());
 	}
 }
 
 void RpcChannel::setServices(const ServicesMap* services)
 {
 	services_ = services;
+}
+
+const char* RpcChannel::errorToString(ErrorReason error)
+{
+	switch (error)
+	{
+		case UNKNOW_ERROR :
+			return "unknow error";
+		case BAD_REQUEST :
+			return "bad request";
+		case BAD_RESPONSE :
+			return "bad response";
+		case SERVICE_NOT_FOUND :
+			return "service not found";
+		case METHOD_NOT_FOUND :
+			return "method not found";
+		case BAD_REQUEST_PROTO :
+			return "bad request protocol";
+		case BAD_RESPONSE_PROTO :
+			return "bad response protocol";
+	}
+	return "unknow error";
+}
+
+void RpcChannel::errorCall(const TcpConnectionPtr& conn,
+							ErrorReason error)
+{
+	LOG_WARN << "Rpc error for reason : " << errorToString(error);
+	conn->shutdown();
+}
+
+void RpcChannel::errorSend(const TcpConnectionPtr& conn,
+							ErrorReason error,
+							int32_t id)
+{
+	RpcMessage message;
+	message.set_type(ERROR);
+	message.set_id(id);
+	message.set_error(error);
+	codec_.send(message,conn_);
 }
 
 void RpcChannel::doneCallback(::google::protobuf::Message* response,

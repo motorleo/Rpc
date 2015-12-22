@@ -3,6 +3,7 @@
 
 #include <muduo/net/TcpConnection.h>
 #include "ProtobufCodec.h"
+#include "MutexLockGuard.h"
 #include <google/protobuf/service.h>
 
 #include <stdint.h>
@@ -17,7 +18,7 @@ typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
 
 
 class RpcChannel : public ::google::protobuf::RpcChannel
-{  //FIXME: no error check
+{  
 public:
 
 	RpcChannel();
@@ -49,13 +50,19 @@ public:
 	}
 
 private:
+	const char* errorToString(ErrorReason);
+	void errorCall(const TcpConnectionPtr&,
+					ErrorReason);
+	void errorSend(const TcpConnectionPtr&,
+					ErrorReason,
+					int32_t);
 
 	void doneCallback(::google::protobuf::Message*,
 					  int32_t);
 
 	typedef std::pair< ::google::protobuf::Message*,
 					  ::google::protobuf::Closure*> ResponseDone;
-	//automically delete response in client
+	//must delete response in client
 	typedef std::map<int32_t,ResponseDone> ResponseDoneMap;
 
 	int32_t id_;
@@ -63,6 +70,7 @@ private:
 	TcpConnectionPtr conn_;
 	ResponseDoneMap responseDoneMap_;
 	const ServicesMap* services_;
+	MutexLock mutex_;
 };
 
 typedef boost::shared_ptr<RpcChannel> RpcChannelPtr;

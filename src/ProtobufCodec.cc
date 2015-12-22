@@ -1,4 +1,5 @@
 #include <muduo/net/Buffer.h>
+#include <muduo/base/Logging.h>
 #include "ProtobufCodec.h"
 
 namespace maxiaoda
@@ -17,7 +18,10 @@ void ProtobufCodec::send(const ::google::protobuf::Message& message,
 {
 	Buffer buf;
 	int size = message.ByteSize();
-	message.SerializeToArray(buf.beginWrite(),size);
+	if (!message.SerializeToArray(buf.beginWrite(),size))
+	{
+		LOG_FATAL << "ProtobufCodec::send() : Message serialize to buffer error!";
+	}
 	buf.hasWritten(size);
 	buf.prependInt32(static_cast<int32_t>(size));
 	conn->send(&buf);
@@ -27,18 +31,25 @@ void ProtobufCodec::onMessage(const TcpConnectionPtr& conn,
 						      Buffer* buf,
 							  Timestamp now)
 {
-	while (buf->readableBytes() > kHeader) //not allowed for empty package
+	while (buf->readableBytes() >= kHeader) //Allowed for empty package
 	{
 		size_t len = static_cast<size_t>(buf->peekInt32());
 		if (kMaxMessage <= len || len <= kMinMessage)
 		{
-			//error check
+			LOG_WARN << "ProtobufCodec::onMessage() : Illegal package length!";
+			conn->shutdown();
+			return;
 		}
 		else if (buf->readableBytes() >= len + kHeader)
 		{
 			RpcMessage message;
 			buf->retrieve(kHeader);
-			message.ParseFromArray(buf->peek(),static_cast<int>(len));
+			if (!message.ParseFromArray(buf->peek(),static_cast<int>(len)))
+			{
+				LOG_WARN << "ProtobufCodec::onMessage() : Parse from buffer error!";
+				conn->shutdown();
+				return;
+			}
 			messageCallback_(conn,message,now);
 			buf->retrieve(len);
 		}

@@ -57,11 +57,17 @@ inline bool MessageType_Parse(
     MessageType_descriptor(), name, value);
 }
 enum ErrorReason {
-  UKNOWERROR = 0
+  UNKNOW_ERROR = 0,
+  BAD_REQUEST = 1,
+  BAD_RESPONSE = 2,
+  SERVICE_NOT_FOUND = 3,
+  METHOD_NOT_FOUND = 4,
+  BAD_REQUEST_PROTO = 5,
+  BAD_RESPONSE_PROTO = 6
 };
 bool ErrorReason_IsValid(int value);
-const ErrorReason ErrorReason_MIN = UKNOWERROR;
-const ErrorReason ErrorReason_MAX = UKNOWERROR;
+const ErrorReason ErrorReason_MIN = UNKNOW_ERROR;
+const ErrorReason ErrorReason_MAX = BAD_RESPONSE_PROTO;
 const int ErrorReason_ARRAYSIZE = ErrorReason_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ErrorReason_descriptor();
