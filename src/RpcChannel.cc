@@ -51,27 +51,27 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 	int32_t id = message.id();
 	if (message.type() == RESPONSE)
 	{	
-		ResponseDoneMap::iterator it = responseDoneMap_.find(id);
-		assert(it != responseDoneMap_.end());
-		if (it == responseDoneMap_.end())
 		{
-			errorCall(conn,BAD_RESPONSE);
-			return;
+			MutexLockGaurd lock(mutex_);
+			ResponseDoneMap::iterator it = responseDoneMap_.find(id);
+			if (it == responseDoneMap_.end())
+			{//FIXME:unlock?
+				errorCall(conn,BAD_RESPONSE);
+				return;
+			}
+			::google::protobuf::Message* response = it->second.first;
+			::google::protobuf::Closure* done = it->second.second;
+			responseDoneMap_.erase(it); 
 		}
-		::google::protobuf::Message* response = it->second.first;
 		if (!response->ParseFromString(message.contend()))
 		{
 			errorCall(conn,BAD_RESPONSE_PROTO);
-			responseDoneMap_.erase(it); //FIXME:unsafe
 			return;
 		}
-		assert(response);
-		::google::protobuf::Closure* done = it->second.second;
 		if (done)
 		{
 			done->Run();
 		}
-		responseDoneMap_.erase(it); //FIXME:unsafe
 	}
 	else if (message.type() == REQUEST)
 	{
