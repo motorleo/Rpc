@@ -51,16 +51,19 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 	int32_t id = message.id();
 	if (message.type() == RESPONSE)
 	{	
+		::google::protobuf::Message* response;
+		::google::protobuf::Closure* done;
 		{
 			MutexLockGaurd lock(mutex_);
 			ResponseDoneMap::iterator it = responseDoneMap_.find(id);
 			if (it == responseDoneMap_.end())
-			{//FIXME:unlock?
+			{
+				lock.~MutexLockGaurd();//unlock
 				errorCall(conn,BAD_RESPONSE);
 				return;
 			}
-			::google::protobuf::Message* response = it->second.first;
-			::google::protobuf::Closure* done = it->second.second;
+			response = it->second.first;
+			done = it->second.second;
 			responseDoneMap_.erase(it); 
 		}
 		if (!response->ParseFromString(message.contend()))
