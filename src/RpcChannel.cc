@@ -28,7 +28,8 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 	std::string str;
 	if (!request->SerializeToString(&str))
 	{
-		LOG_FATAL << "RpcChannel::CallMethod() : Request serialize to string error !";
+		errorCall(conn_,BAD_REQUEST);
+		return;
 	}
 	message.set_contend(str);
 
@@ -57,7 +58,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 			MutexLockGaurd lock(mutex_);
 			ResponseDoneMap::iterator it = responseDoneMap_.find(id);
 			if (it == responseDoneMap_.end())
-			{
+			{//FIXME:if that safe?
 				lock.~MutexLockGaurd();//unlock
 				errorCall(conn,BAD_RESPONSE);
 				return;
