@@ -7,6 +7,7 @@ class MutexLock : public boost::noncopyable
 {
 public:
 	MutexLock()
+		:isLock_(false)
 	{
 		pthread_mutex_init(&mutex_,NULL);
 	}
@@ -19,15 +20,23 @@ public:
 	void lock()
 	{
 		pthread_mutex_lock(&mutex_);
+		isLock_ = true;
 	}
 
 	void unlock()
 	{
 		pthread_mutex_unlock(&mutex_);
+		isLock_ = false;
+	}
+
+	bool isLock()
+	{
+		return isLock_;
 	}
 
 private:
 	pthread_mutex_t mutex_;
+	bool isLock_;
 };
 
 class MutexLockGaurd : public boost::noncopyable
@@ -41,7 +50,10 @@ public:
 
 	~MutexLockGaurd()
 	{
-		mutex_.unlock();
+		if (mutex_.isLock())
+		{
+			mutex_.unlock();
+		}
 	}
 
 private:
