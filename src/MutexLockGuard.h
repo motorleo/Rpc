@@ -50,12 +50,16 @@ public:
 
 	~MutexLockGaurd()
 	{
+		unlock();
+	}
+
+	void unlock()
+	{
 		if (mutex_.isLock())
 		{
 			mutex_.unlock();
 		}
 	}
-
 private:
 	MutexLock& mutex_;
 };

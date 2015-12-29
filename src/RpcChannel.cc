@@ -58,8 +58,8 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
 			MutexLockGaurd lock(mutex_);
 			ResponseDoneMap::iterator it = responseDoneMap_.find(id);
 			if (it == responseDoneMap_.end())
-			{//FIXME:if that safe?
-				lock.~MutexLockGaurd();//unlock
+			{
+				lock.unlock();
 				errorCall(conn,BAD_RESPONSE);
 				return;
 			}
