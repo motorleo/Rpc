@@ -12,17 +12,13 @@ namespace protobuf
 
 namespace maxiaoda
 {
-
-using namespace muduo;
-using namespace muduo::net;
-
 class RpcServer : public boost::noncopyable
 {
 
 public:
-	RpcServer(EventLoop* loop,
-		      const InetAddress& listenAddr,
-			  const string nameArg = "RpcServer");
+	RpcServer(::muduo::net::EventLoop* loop,
+		      const ::muduo::net::InetAddress& listenAddr,
+			  const char* nameArg = "RpcServer");
 
 	~RpcServer()
 	{
@@ -37,12 +33,12 @@ public:
 
 
 private:
-	void onConnection(const TcpConnectionPtr&);
+	void onConnection(const ::muduo::net::TcpConnectionPtr&);
 
 	typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
 
 	ServicesMap services_;
-	TcpServer server_;
+	::muduo::net::TcpServer server_;
 };
 
 }

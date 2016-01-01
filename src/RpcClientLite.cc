@@ -6,9 +6,9 @@
 
 namespace maxiaoda
 {
-RpcClientLite::RpcClientLite(EventLoop* loop,
-							 const InetAddress& serverAddr,
-							 const string nameArg)
+RpcClientLite::RpcClientLite(::muduo::net::EventLoop* loop,
+							 const ::muduo::net::InetAddress& serverAddr,
+							 const char* nameArg)
 	:loop_(loop),channel_(new RpcChannel),client_(loop,serverAddr,nameArg)
 {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -20,7 +20,7 @@ RpcClientLite::RpcClientLite(EventLoop* loop,
 }
 
 
-void RpcClientLite::onConnection(const TcpConnectionPtr& conn)
+void RpcClientLite::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 {
 	LOG_INFO << "RpcClient - " << conn->localAddress().toIpPort() << " -> "
 		<< conn->peerAddress().toIpPort() << " is "

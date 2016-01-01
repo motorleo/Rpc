@@ -7,8 +7,6 @@
 
 namespace maxiaoda
 {
-using namespace muduo;
-using namespace muduo::net;
 
 RpcChannel::RpcChannel()
 	:id_(-1),codec_(boost::bind(&RpcChannel::onRpcMessage,this,_1,_2,_3))
@@ -44,9 +42,9 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 	
 
 
-void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
+void RpcChannel::onRpcMessage(const ::muduo::net::TcpConnectionPtr& conn,
 						      const RpcMessage& message,
-							  Timestamp now)
+							  ::muduo::Timestamp now)
 {
 	assert(conn == conn_);
 	int32_t id = message.id();
@@ -138,14 +136,14 @@ const char* RpcChannel::errorToString(ErrorReason error)
 	return "unknow error";
 }
 
-void RpcChannel::errorCall(const TcpConnectionPtr& conn,
+void RpcChannel::errorCall(const ::muduo::net::TcpConnectionPtr& conn,
 							ErrorReason error)
 {
 	LOG_WARN << "Rpc error for reason : " << errorToString(error);
 	conn->shutdown();
 }
 
-void RpcChannel::errorSend(const TcpConnectionPtr& conn,
+void RpcChannel::errorSend(const ::muduo::net::TcpConnectionPtr& conn,
 							ErrorReason error,
 							int32_t id)
 {

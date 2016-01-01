@@ -5,18 +5,15 @@
 namespace maxiaoda
 {
 
-using namespace muduo;
-using namespace muduo::net;
-
 ProtobufCodec::ProtobufCodec(const ProtobufMessageCallback& callback)
 	:messageCallback_(callback)
 {
 }
 
 void ProtobufCodec::send(const ::google::protobuf::Message& message,
-						 const TcpConnectionPtr& conn)
+						 const ::muduo::net::TcpConnectionPtr& conn)
 {
-	Buffer buf;
+	::muduo::net::Buffer buf;
 	int size = message.ByteSize();
 	if (!message.SerializeToArray(buf.beginWrite(),size))
 	{
@@ -27,9 +24,9 @@ void ProtobufCodec::send(const ::google::protobuf::Message& message,
 	conn->send(&buf);
 }
 
-void ProtobufCodec::onMessage(const TcpConnectionPtr& conn,
-						      Buffer* buf,
-							  Timestamp now)
+void ProtobufCodec::onMessage(const ::muduo::net::TcpConnectionPtr& conn,
+						      ::muduo::net::Buffer* buf,
+							  ::muduo::Timestamp now)
 {
 	while (buf->readableBytes() >= kHeader) //Allowed for empty package
 	{

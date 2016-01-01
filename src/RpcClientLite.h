@@ -6,15 +6,13 @@
 
 namespace maxiaoda
 {
-using namespace muduo;
-using namespace muduo::net;
 
 class RpcClientLite : public boost::noncopyable
 {
 public:
-	RpcClientLite(EventLoop* loop,
-				  const InetAddress& serverAddr,
-				  const string nameArg = "RpcClient");
+	RpcClientLite(::muduo::net::EventLoop* loop,
+				  const ::muduo::net::InetAddress& serverAddr,
+				  const char* nameArg = "RpcClient");
 
 	~RpcClientLite()
 	{
@@ -41,13 +39,13 @@ public:
 		return channel_.get();
 	}
 private:
-	void onConnection(const TcpConnectionPtr&);
+	void onConnection(const ::muduo::net::TcpConnectionPtr&);
 	
-	virtual void initCallback(const TcpConnectionPtr&) = 0;
+	virtual void initCallback(const ::muduo::net::TcpConnectionPtr&) = 0;
 
-	EventLoop* loop_;
+	::muduo::net::EventLoop* loop_;
 	RpcChannelPtr channel_;
-	TcpClient client_;
+	::muduo::net::TcpClient client_;
 
 };
 

@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <boost/noncopyable.hpp>
 
 
 namespace maxiaoda

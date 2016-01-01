@@ -11,8 +11,6 @@
 namespace maxiaoda
 {
 
-using namespace muduo;
-using namespace muduo::net;
 
 typedef boost::shared_ptr< ::muduo::net::TcpConnection> TcpConnectionPtr;
 typedef boost::shared_ptr<google::protobuf::Message> MessagePtr;
@@ -30,9 +28,9 @@ public:
 
 	void send(const ::google::protobuf::Message&,const TcpConnectionPtr&);
 
-	void onMessage(const TcpConnectionPtr&,
-				   Buffer*,
-				   Timestamp);
+	void onMessage(const ::muduo::net::TcpConnectionPtr&,
+				   ::muduo::net::Buffer*,
+				   ::muduo::Timestamp);
 
 private:
 	const static size_t kHeader = sizeof(int32_t);

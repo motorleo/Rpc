@@ -7,9 +7,9 @@
 
 namespace maxiaoda
 {
-RpcServer::RpcServer(EventLoop* loop,
-				     const InetAddress& listenAddr,
-					 const string nameArg)
+RpcServer::RpcServer(::muduo::net::EventLoop* loop,
+				     const ::muduo::net::InetAddress& listenAddr,
+					 const char* nameArg)
 	:server_(loop,listenAddr,nameArg)
 {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -23,7 +23,7 @@ void RpcServer::registerService( ::google::protobuf::Service* service)
 	services_[service->GetDescriptor()->name()] = service;
 }
 
-void RpcServer::onConnection(const TcpConnectionPtr& conn)
+void RpcServer::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 {
 	LOG_INFO << "RpcServer - " << conn->peerAddress().toIpPort() << " -> "
 		<< conn->localAddress().toIpPort() << " is "

@@ -12,8 +12,6 @@
 namespace maxiaoda
 {
 
-using namespace muduo;
-using namespace muduo::net;
 typedef std::map<std::string,::google::protobuf::Service*> ServicesMap;
 
 
@@ -30,30 +28,30 @@ public:
 					::google::protobuf::Closure* done);
 	
 
-	inline void onMessage(const TcpConnectionPtr& conn,
-	 					  Buffer* buf,
-						  Timestamp now)
+	inline void onMessage(const ::muduo::net::TcpConnectionPtr& conn,
+	 					  ::muduo::net::Buffer* buf,
+						  ::muduo::Timestamp now)
 	{
 		codec_.onMessage(conn,buf,now);
 	}
 
 
-	void onRpcMessage(const TcpConnectionPtr&,
+	void onRpcMessage(const ::muduo::net::TcpConnectionPtr&,
 					  const RpcMessage&,
-					  Timestamp);
+					  ::muduo::Timestamp);
 
 	void setServices(const ServicesMap*);
 
-	inline void setConnection(const TcpConnectionPtr& conn)
+	inline void setConnection(const ::muduo::net::TcpConnectionPtr& conn)
 	{
 		conn_ = conn;
 	}
 
 private:
 	const char* errorToString(ErrorReason);
-	void errorCall(const TcpConnectionPtr&,
+	void errorCall(const ::muduo::net::TcpConnectionPtr&,
 					ErrorReason);
-	void errorSend(const TcpConnectionPtr&,
+	void errorSend(const ::muduo::net::TcpConnectionPtr&,
 					ErrorReason,
 					int32_t);
 
@@ -67,7 +65,7 @@ private:
 
 	int32_t id_;
 	ProtobufCodec codec_;
-	TcpConnectionPtr conn_;
+	::muduo::net::TcpConnectionPtr conn_;
 	ResponseDoneMap responseDoneMap_;
 	const ServicesMap* services_;
 	MutexLock mutex_;
