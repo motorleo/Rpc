@@ -1,13 +1,15 @@
 #ifndef _RPCCHANNEL_H_
 #define _RPCCHANNEL_H_
 
-#include <muduo/net/TcpConnection.h>
 #include "ProtobufCodec.h"
 #include "MutexLockGuard.h"
-#include <google/protobuf/service.h>
 
 #include <stdint.h>
 #include <utility>
+
+#include <muduo/net/TcpConnection.h>
+#include <google/protobuf/service.h>
+
 
 namespace maxiaoda
 {

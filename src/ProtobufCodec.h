@@ -1,12 +1,12 @@
 #ifndef _PROTOBUFCODEC_H_
 #define _PROTOBUFCODEC_H_
 
-#include <muduo/net/TcpConnection.h>
 #include "RpcMessage.pb.h"
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <muduo/net/TcpConnection.h>
 
 namespace maxiaoda
 {

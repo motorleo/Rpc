@@ -1,6 +1,7 @@
+#include "ProtobufCodec.h"
+
 #include <muduo/net/Buffer.h>
 #include <muduo/base/Logging.h>
-#include "ProtobufCodec.h"
 
 namespace maxiaoda
 {

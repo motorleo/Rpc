@@ -1,8 +1,9 @@
 #ifndef _RPCCLIENT_H_
 #define _RPCCLIENT_H_
 
-#include <muduo/net/TcpClient.h>
 #include "RpcChannel.h"
+
+#include <muduo/net/TcpClient.h>
 
 namespace maxiaoda
 {
