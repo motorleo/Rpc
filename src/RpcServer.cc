@@ -19,12 +19,10 @@ RpcServer::RpcServer(::muduo::net::EventLoop* loop,
 	server_.setConnectionCallback(
 			boost::bind(&RpcServer::onConnection,this,_1));
 }
-
 void RpcServer::registerService( ::google::protobuf::Service* service)
 {
 	services_[service->GetDescriptor()->name()] = service;
 }
-
 void RpcServer::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 {
 	LOG_INFO << "RpcServer - " << conn->peerAddress().toIpPort() << " -> "
@@ -44,6 +42,4 @@ void RpcServer::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 		conn->setContext(RpcChannelPtr());
 	}
 }
-
-
 }

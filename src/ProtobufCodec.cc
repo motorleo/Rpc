@@ -5,12 +5,10 @@
 
 namespace maxiaoda
 {
-
 ProtobufCodec::ProtobufCodec(const ProtobufMessageCallback& callback)
 	:messageCallback_(callback)
 {
 }
-
 void ProtobufCodec::send(const ::google::protobuf::Message& message,
 						 const ::muduo::net::TcpConnectionPtr& conn)
 {
@@ -24,7 +22,6 @@ void ProtobufCodec::send(const ::google::protobuf::Message& message,
 	buf.prependInt32(static_cast<int32_t>(size));
 	conn->send(&buf);
 }
-
 void ProtobufCodec::onMessage(const ::muduo::net::TcpConnectionPtr& conn,
 						      ::muduo::net::Buffer* buf,
 							  ::muduo::Timestamp now)
@@ -57,5 +54,4 @@ void ProtobufCodec::onMessage(const ::muduo::net::TcpConnectionPtr& conn,
 		}
 	}
 }
-
 }//namespace maxiaoda

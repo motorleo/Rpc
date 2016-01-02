@@ -8,15 +8,12 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
 
-
 namespace maxiaoda
 {
-
 RpcChannel::RpcChannel()
 	:id_(-1),codec_(boost::bind(&RpcChannel::onRpcMessage,this,_1,_2,_3))
 {
 }
-
 void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 							::google::protobuf::RpcController* controller,
 							const ::google::protobuf::Message* request,
@@ -43,9 +40,6 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 
 	codec_.send(message,conn_);
 }
-	
-
-
 void RpcChannel::onRpcMessage(const ::muduo::net::TcpConnectionPtr& conn,
 						      const RpcMessage& message,
 							  ::muduo::Timestamp now)
@@ -112,12 +106,10 @@ void RpcChannel::onRpcMessage(const ::muduo::net::TcpConnectionPtr& conn,
 		errorCall(conn,message.error());
 	}
 }
-
 void RpcChannel::setServices(const ServicesMap* services)
 {
 	services_ = services;
 }
-
 const char* RpcChannel::errorToString(ErrorReason error)
 {
 	switch (error)
@@ -139,14 +131,12 @@ const char* RpcChannel::errorToString(ErrorReason error)
 	}
 	return "unknow error";
 }
-
 void RpcChannel::errorCall(const ::muduo::net::TcpConnectionPtr& conn,
 							ErrorReason error)
 {
 	LOG_WARN << "Rpc error for reason : " << errorToString(error);
 	conn->shutdown();
 }
-
 void RpcChannel::errorSend(const ::muduo::net::TcpConnectionPtr& conn,
 							ErrorReason error,
 							int32_t id)
@@ -157,7 +147,6 @@ void RpcChannel::errorSend(const ::muduo::net::TcpConnectionPtr& conn,
 	message.set_error(error);
 	codec_.send(message,conn_);
 }
-
 void RpcChannel::doneCallback(::google::protobuf::Message* response,
 							  int32_t id)
 {
@@ -170,5 +159,4 @@ void RpcChannel::doneCallback(::google::protobuf::Message* response,
 	message.set_contend(str);
 	codec_.send(message,conn_);
 }
-	
 }//namespace maxiaoda

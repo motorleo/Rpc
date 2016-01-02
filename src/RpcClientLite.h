@@ -8,6 +8,7 @@
 namespace maxiaoda
 {
 
+//	inheritance RpcClientLite can make your code shorter.
 class RpcClientLite : public boost::noncopyable
 {
 public:
@@ -19,17 +20,14 @@ public:
 	{
 		::google::protobuf::ShutdownProtobufLibrary();
 	}
-
 	void connect()
 	{
 		client_.connect();
 	}
-	
 	void disconnect()
 	{
 		client_.disconnect();
 	}
-
 	void enableRetry()
 	{
 		client_.enableRetry();
@@ -41,15 +39,11 @@ public:
 	}
 private:
 	void onConnection(const ::muduo::net::TcpConnectionPtr&);
-	
 	virtual void initCallback(const ::muduo::net::TcpConnectionPtr&) = 0;
-
 	::muduo::net::EventLoop* loop_;
 	RpcChannelPtr channel_;
 	::muduo::net::TcpClient client_;
-
 };
-
 }
 
 

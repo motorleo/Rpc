@@ -2,6 +2,8 @@
 
 #include <boost/noncopyable.hpp>
 
+//	an RAII mutex lock.
+//	automatically initialize and destroy.
 
 namespace maxiaoda
 {
@@ -40,6 +42,8 @@ private:
 	pthread_mutex_t mutex_;
 	bool isLock_;
 };
+
+//	automatically lock and unlock.
 
 class MutexLockGaurd : public boost::noncopyable
 {

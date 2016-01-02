@@ -20,8 +20,6 @@ RpcClientLite::RpcClientLite(::muduo::net::EventLoop* loop,
 	client_.setMessageCallback(
 			boost::bind(&RpcChannel::onMessage,get_pointer(channel_),_1,_2,_3));
 }
-
-
 void RpcClientLite::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 {
 	LOG_INFO << "RpcClient - " << conn->localAddress().toIpPort() << " -> "
@@ -37,5 +35,4 @@ void RpcClientLite::onConnection(const ::muduo::net::TcpConnectionPtr& conn)
 		loop_->quit();
 	}
 }
-
 }
