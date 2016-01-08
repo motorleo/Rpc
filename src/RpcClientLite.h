@@ -20,14 +20,17 @@ public:
 	{
 		::google::protobuf::ShutdownProtobufLibrary();
 	}
+
 	void connect()
 	{
 		client_.connect();
 	}
+
 	void disconnect()
 	{
 		client_.disconnect();
 	}
+
 	void enableRetry()
 	{
 		client_.enableRetry();

@@ -24,29 +24,37 @@ public:
 					const ::google::protobuf::Message* request,
 					::google::protobuf::Message* response,
 					::google::protobuf::Closure* done);
+
 	inline void onMessage(const ::muduo::net::TcpConnectionPtr& conn,
 	 					  ::muduo::net::Buffer* buf,
 						  ::muduo::Timestamp now)
 	{
 		codec_.onMessage(conn,buf,now);
 	}
+
 	void onRpcMessage(const ::muduo::net::TcpConnectionPtr&,
 					  const RpcMessage&,
 					  ::muduo::Timestamp);
 	void setServices(const ServicesMap*);
+
 	inline void setConnection(const ::muduo::net::TcpConnectionPtr& conn)
 	{
 		conn_ = conn;
 	}
+
 private:
 	const char* errorToString(ErrorReason);
+
 	void errorCall(const ::muduo::net::TcpConnectionPtr&,
 					ErrorReason);
+
 	void errorSend(const ::muduo::net::TcpConnectionPtr&,
 					ErrorReason,
 					int32_t);
+
 	void doneCallback(::google::protobuf::Message*,
 					  int32_t);
+
 	typedef std::pair< ::google::protobuf::Message*,
 					  ::google::protobuf::Closure*> ResponseDone;
 	//must delete response in client
@@ -58,6 +66,7 @@ private:
 	const ServicesMap* services_;
 	MutexLock mutex_;
 };
+
 typedef boost::shared_ptr<RpcChannel> RpcChannelPtr;
 }
 #endif

@@ -19,11 +19,14 @@ public:
 	RpcServer(::muduo::net::EventLoop* loop,
 		      const ::muduo::net::InetAddress& listenAddr,
 			  const char* nameArg = "RpcServer");
+
 	~RpcServer()
 	{
 		::google::protobuf::ShutdownProtobufLibrary();
 	}
+
 	void registerService( ::google::protobuf::Service*);
+
 	void start()
 	{
 		server_.start();
