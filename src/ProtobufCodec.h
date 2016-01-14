@@ -1,7 +1,7 @@
 #ifndef _PROTOBUFCODEC_H_
 #define _PROTOBUFCODEC_H_
 
-#include <RpcMessage.pb.h>
+#include "RpcMessage.pb.h"
 
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
