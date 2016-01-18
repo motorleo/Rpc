@@ -61,5 +61,5 @@ target_link_libraries(maxiaoda ${muduo_net})
 target_link_libraries(maxiaoda ${muduo_base})
 target_link_libraries(maxiaoda pthread)
 
-add_subdirectory(sudoku)
+add_subdirectory(demo)
 
