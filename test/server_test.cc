@@ -3,6 +3,8 @@
 #include <muduo/net/EventLoop.h>
 #include "../src/RpcServer.h"
 
+#include <stdio.h>
+
 using namespace muduo;
 using namespace muduo::net;
 using namespace maxiaoda;
@@ -24,13 +26,20 @@ namespace test
 	};
 }
 
-int main()
+int main(int argc,char** argv)
 {
-	EventLoop loop;
-	InetAddress listenAddr(9981);
-	test::testServiceImpl impl;
-	RpcServer server(&loop, listenAddr);
-	server.registerService(&impl);
-	server.start();
-	loop.loop();
+	if (argc > 1)
+	{
+		EventLoop loop;
+		InetAddress listenAddr(9981);
+		test::testServiceImpl impl;
+		RpcServer server(&loop, listenAddr,atoi(argv[1]));
+		server.registerService(&impl);
+		server.start();
+		loop.loop();
+	}
+	else
+	{
+		printf("usage:<%s> <nThread>\n",argv[0]);
+	}
 }

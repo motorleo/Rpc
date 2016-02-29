@@ -11,6 +11,7 @@ namespace maxiaoda
 {
 RpcServer::RpcServer(::muduo::net::EventLoop* loop,
 				     const ::muduo::net::InetAddress& listenAddr,
+					 int nThreadsNum,
 					 const char* nameArg)
 	:server_(loop,listenAddr,nameArg)
 {
@@ -18,6 +19,10 @@ RpcServer::RpcServer(::muduo::net::EventLoop* loop,
 	//version check
 	server_.setConnectionCallback(
 			boost::bind(&RpcServer::onConnection,this,_1));
+	if (nThreadsNum > 0)
+	{
+		server_.setThreadNum(nThreadsNum);
+	}
 }
 
 void RpcServer::registerService( ::google::protobuf::Service* service)

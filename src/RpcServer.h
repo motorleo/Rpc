@@ -18,6 +18,7 @@ class RpcServer : public boost::noncopyable
 public:
 	RpcServer(::muduo::net::EventLoop* loop,
 		      const ::muduo::net::InetAddress& listenAddr,
+			  int nThreadsNum = 0,
 			  const char* nameArg = "RpcServer");
 
 	~RpcServer()
