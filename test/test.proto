@@ -1,0 +1,12 @@
+package test;
+option cc_generic_services = true;
+
+message testMessage
+{
+	required string echoString = 1;
+}
+
+service testService
+{
+	rpc Echo (testMessage) returns (testMessage);
+}

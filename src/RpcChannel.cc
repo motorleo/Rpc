@@ -15,6 +15,8 @@ RpcChannel::RpcChannel()
 {
 }
 
+//inheritance
+//for client
 void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 							::google::protobuf::RpcController* controller,
 							const ::google::protobuf::Message* request,
@@ -38,7 +40,6 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 		message.set_id(++id_);
 		responseDoneMap_[id_] = ::std::make_pair(response,done);
 	}
-
 	codec_.send(message,conn_);
 }
 

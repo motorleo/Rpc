@@ -1,16 +1,19 @@
 package demo;
 option cc_generic_services = true;
 
-message demoRequest {
-  required string request = 1;
+message demoRequest 
+{
+	required string request = 1;
 }
 
-message demoResponse {
-  optional bool solved = 1 [default=false];
-  optional string response = 2;
+message demoResponse 
+{
+	optional bool solved = 1 [default=false];
+	optional string response = 2;
 }
 
-service demoService {
-  rpc Solve (demoRequest) returns (demoResponse);
+service demoService 
+{
+	rpc Solve (demoRequest) returns (demoResponse);
 }
 

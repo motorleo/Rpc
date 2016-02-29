@@ -16,7 +16,7 @@ public:
 				  const ::muduo::net::InetAddress& serverAddr,
 				  const char* nameArg = "RpcClient");
 
-	~RpcClientLite()
+	virtual ~RpcClientLite()
 	{
 		::google::protobuf::ShutdownProtobufLibrary();
 	}

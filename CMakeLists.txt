@@ -62,4 +62,5 @@ target_link_libraries(maxiaoda ${muduo_base})
 target_link_libraries(maxiaoda pthread)
 
 add_subdirectory(demo)
+add_subdirectory(test)
 
