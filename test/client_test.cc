@@ -9,7 +9,7 @@
 #include <string>
 
 
-#define TIMEOUT 40
+#define TIMEOUT 20
 
 using namespace maxiaoda;
 using namespace muduo;
@@ -43,22 +43,28 @@ private:
 class bench
 {
 public:
-	bench(EventLoop* loop,const InetAddress& addr,int nClient,int nMessageSize)
-		:loop_(loop),testVec_(),string_()
+	bench(EventLoop* loop,
+			const InetAddress& addr,
+			int nClient,
+			int nMessageSize,
+			int Timeout)
+		:loop_(loop),testVec_(),string_(),ClientCount_(0),timeout_(Timeout)
 	{
 		for (int i = 0;i < nMessageSize;++i)
 		{
 			string_ += 'i';
 		}
 
-		while (ClientCount_ < nClient)
+		while (++ClientCount_ <= nClient)
 		{
 			testClient* client = new testClient(loop,addr,this);
 			client->connect();
 			testVec_.push_back(client);
-			++ClientCount_;
 		}
+		--ClientCount_;
 	}
+
+	int getTimeout() { return timeout_;}
 
 	const std::string& getString() { return string_; }
 
@@ -75,8 +81,9 @@ public:
 			}
 			LOG_WARN << "all client done.";
 			LOG_WARN << "Total send message:" << messageCount;
-			LOG_WARN << static_cast<long long>(messageCount * string_.size()) / (TIMEOUT * 1024 * 1024)
-				     << "MB/s throughput.";
+			LOG_WARN << static_cast<long long>(messageCount * string_.size()) / (getTimeout() * 1024 * 1024)
+				     << " MB/s throughput.";
+			LOG_WARN << messageCount / getTimeout() << " /s request.";
 			loop_->quit();	
 		}
 	}
@@ -86,6 +93,7 @@ private:
 	std::vector<testClient*> testVec_;
 	std::string string_;
 	int ClientCount_;
+	int timeout_;
 };
 
 void testClient::initCallback(const TcpConnectionPtr& conn)
@@ -100,7 +108,7 @@ void testClient::initCallback(const TcpConnectionPtr& conn)
 void testClient::doneCallback(test::testMessage* request)
 {   
 	++messagecount_;
-	if (time(NULL) - startTime_ < TIMEOUT)
+	if (time(NULL) - startTime_ < owner_->getTimeout())
 	{
 		if (request)
 		{
@@ -118,17 +126,18 @@ void testClient::doneCallback(test::testMessage* request)
 
 int main(int argc,char** argv)
 {
-	if (argc >= 4)
+	if (argc >= 5)
 	{
 		EventLoop loop;
 		InetAddress address(argv[1],9981);
 		int nClient = atoi(argv[2]);
 		int MessageSize = atoi(argv[3]);
-		bench client(&loop,address,nClient,MessageSize);
+		int timeout = atoi(argv[4]);
+		bench client(&loop,address,nClient,MessageSize,timeout);
 		loop.loop();
 	}
 	else
 	{
-		printf("Usage:<%s> <host_ip> <nClient> <MessageSize>!\n",argv[0]);
+		printf("Usage:<%s> <host_ip> <nClient> <MessageSize> <Timeout>!\n",argv[0]);
 	}
 }

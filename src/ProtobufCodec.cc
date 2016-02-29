@@ -2,6 +2,7 @@
 
 #include <muduo/net/Buffer.h>
 #include <muduo/base/Logging.h>
+#include <string>
 
 namespace maxiaoda
 {
@@ -15,6 +16,7 @@ void ProtobufCodec::send(const ::google::protobuf::Message& message,
 {
 	::muduo::net::Buffer buf;
 	int size = message.ByteSize();
+	assert(size < 1020);
 	if (!message.SerializeToArray(buf.beginWrite(),size))
 	{
 		LOG_FATAL << "ProtobufCodec::send() : Message serialize to buffer error!";

@@ -31,7 +31,7 @@ public:
 				   ::muduo::Timestamp);
 private:
 	const static size_t kHeader = sizeof(int32_t);
-	const static size_t kMaxMessage = 16*1024*1024;//changeable
+	const static size_t kMaxMessage = 1024;//changeable
 	const static size_t kMinMessage = 0;           //changeable
 	ProtobufMessageCallback messageCallback_;
 };
