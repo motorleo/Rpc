@@ -34,18 +34,14 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
 		return;
 	}
 	message.set_contend(str);
-
-	{
-		MutexLockGaurd lock(mutex_);	
-		message.set_id(++id_);
-		responseDoneMap_[id_] = ::std::make_pair(response,done);
-	}
+	message.set_id(++id_);
+	responseDoneMap_[id_] = ::std::make_pair(response,done);
 	codec_.send(message,conn_);
 }
 
 void RpcChannel::onRpcMessage(const ::muduo::net::TcpConnectionPtr& conn,
-						      const RpcMessage& message,
-							  ::muduo::Timestamp now)
+		const RpcMessage& message,
+		::muduo::Timestamp now)
 {
 	assert(conn == conn_);
 	int32_t id = message.id();
@@ -53,19 +49,15 @@ void RpcChannel::onRpcMessage(const ::muduo::net::TcpConnectionPtr& conn,
 	{	
 		::google::protobuf::Message* response;
 		::google::protobuf::Closure* done;
+		ResponseDoneMap::iterator it = responseDoneMap_.find(id);
+		if (it == responseDoneMap_.end())
 		{
-			MutexLockGaurd lock(mutex_);
-			ResponseDoneMap::iterator it = responseDoneMap_.find(id);
-			if (it == responseDoneMap_.end())
-			{
-				lock.unlock();
-				errorCall(conn,BAD_RESPONSE);
-				return;
-			}
-			response = it->second.first;
-			done = it->second.second;
-			responseDoneMap_.erase(it); 
+			errorCall(conn,BAD_RESPONSE);
+			return;
 		}
+		response = it->second.first;
+		done = it->second.second;
+		responseDoneMap_.erase(it); 
 		if (!response->ParseFromString(message.contend()))
 		{
 			errorCall(conn,BAD_RESPONSE_PROTO);

@@ -1,6 +1,7 @@
 #include "test.pb.h"
 #include "../src/RpcClientLite.h"
 #include <muduo/base/Logging.h>
+#include <muduo/base/Thread.h>
 #include <muduo/net/EventLoop.h>
 #include <muduo/net/EventLoopThreadPool.h>
 #include <boost/bind.hpp>
@@ -52,7 +53,7 @@ public:
 			int nClient,
 			int nMessageSize,
 			int Timeout)
-		:loop_(loop),threadPool_(loop,""),ClientCount_(0),timeout_(Timeout)
+		:loop_(loop),threadPool_(loop,""),timeout_(Timeout),nClient_(nClient)
 	{
 		loop->runAfter(Timeout, boost::bind(&bench::setExit, this));
 		for (int i = 0;i < nMessageSize;++i)
@@ -60,7 +61,7 @@ public:
 			string_ += 'i';
 		}
 
-		//threadPool_.setThreadNum(2);
+		threadPool_.setThreadNum(2);
 		threadPool_.start();
 
 		for (int i = 0;i < nClient;++i)
@@ -86,14 +87,14 @@ public:
 
 	void onDisconnect()
 	{
-		if (--ClientCount_ == 0)
+		if (decreaseCount())
 		{
 			int messageCount = 0;
 			std::vector<testClient*>::iterator iter = testVec_.begin();
 			for (;iter < testVec_.end();++iter)
 			{
 				messageCount += (*iter)->messagecount();
-				delete (*iter);
+				//delete (*iter);
 			}
 			LOG_WARN << "all client done.";
 			LOG_WARN << "Total send message:" << messageCount;
@@ -104,19 +105,23 @@ public:
 		}
 	}
 
-	void increaseCount() { ++ClientCount_; }
+	bool increaseCount() { return ClientCount_.incrementAndGet() == nClient_; }
+
+	bool decreaseCount() { return ClientCount_.decrementAndGet() == 0; }
 private:
 	EventLoop* loop_;
 	EventLoopThreadPool threadPool_;
 	std::vector<testClient*> testVec_;
 	std::string string_;
-	int ClientCount_;
+	AtomicInt32 ClientCount_;
 	int timeout_;
+	int nClient_;
 };
 
 void testClient::initCallback(const TcpConnectionPtr& conn)
 {   
-	owner_->increaseCount();
+	if (owner_->increaseCount())
+		LOG_WARN << "all connected.";
 	test::testMessage request;
 	request.set_echostring(owner_->getString());
 	test::testMessage* response(new test::testMessage());
@@ -133,13 +138,13 @@ void testClient::doneCallback(test::testMessage* request)
 			test::testMessage* response(new test::testMessage());
 			stub_.Echo(NULL,request,response,NewCallback(this,&testClient::doneCallback,response));
 		}
+		delete request;
 	}
 	else
 	{
 		disconnect();
 		owner_->onDisconnect();
 	}
-	delete request;
 }
 
 int main(int argc,char** argv)
